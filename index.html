@@ -2,133 +2,92 @@
 <html>
 
 <head>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Number Speed</title>
+<title>Fast Tap 1-16</title>
 
 <style>
 
 body{
     background:#111;
     color:white;
-    font-family:Arial, sans-serif;
+    font-family:Arial;
     text-align:center;
     margin:0;
     padding-top:20px;
+    user-select:none;
 }
-
 
 h1{
-    font-size:40px;
-    margin-bottom:10px;
+    font-size:32px;
+    margin:10px;
 }
-
 
 #timer{
-
-    font-size:28px;
-    margin:20px;
-
+    font-size:24px;
+    margin-bottom:20px;
 }
-
-
 
 .grid{
-
     display:grid;
-    grid-template-columns:repeat(4,80px);
-    gap:12px;
+    grid-template-columns:repeat(4,85px);
+    gap:10px;
     justify-content:center;
-
 }
 
-
-
-.number{
-
-    width:80px;
-    height:80px;
-    border:none;
-    border-radius:15px;
-    font-size:32px;
+.btn{
+    width:85px;
+    height:85px;
+    border-radius:16px;
+    font-size:30px;
     font-weight:bold;
     color:white;
-    cursor:pointer;
-
-    transition:0.1s;
-
+    border:none;
+    touch-action: manipulation;
+    transition:0.05s;
 }
 
-
-
-.number:active{
-
-    transform:scale(0.9);
-
+.btn:active{
+    transform:scale(0.92);
 }
-
-
 
 #reset{
-
-    margin-top:35px;
-    width:220px;
-    height:55px;
+    margin-top:25px;
+    width:200px;
+    height:50px;
     border:none;
-    border-radius:15px;
-    font-size:22px;
+    border-radius:12px;
+    font-size:18px;
     font-weight:bold;
-    background:white;
-    color:black;
-
 }
 
+.wrong{
+    filter:brightness(0.5);
+}
 
 </style>
 
-
 </head>
-
 
 <body>
 
+<h1 id="title">Tap 1 → 16</h1>
 
-<h1>0.0s</h1>
-
-
-<div id="timer">
-Tiempo: 0.0
-</div>
-
-
+<div id="timer">0.00s</div>
 
 <div class="grid" id="game"></div>
 
-
-
-<button id="reset">
-Reiniciar
-</button>
-
-
+<button id="reset">Reiniciar</button>
 
 <script>
 
-
-let numeros=[
-
+const numeros = [
 12,14,1,6,
 4,13,11,16,
 3,7,15,8,
 2,10,9,5
-
 ];
 
-
-
-let colores={
-
+const colores = {
 12:"#F6C900",
 14:"#4267D5",
 1:"#D81B60",
@@ -148,181 +107,83 @@ let colores={
 10:"#F4511E",
 9:"#5B2BBF",
 5:"#7CC9C9"
-
 };
 
-
-
-let siguiente=1;
-
-let tiempo=0;
-
-let iniciado=false;
-
-let intervalo;
-
-
-
-function iniciarJuego(){
-
-
-    siguiente=1;
-
-    tiempo=0;
-
-    iniciado=false;
-
-
-    clearInterval(intervalo);
-
-
-
-    document.getElementById("timer").innerHTML=
-    "Tiempo: 0.0";
-
-
-
-    let game=document.getElementById("game");
-
-    game.innerHTML="";
-
-
-
-    numeros.forEach(numero=>{
-
-
-        let boton=document.createElement("button");
-
-
-        boton.className="number";
-
-
-        boton.innerHTML=numero;
-
-
-        boton.style.background=colores[numero];
-
-
-
-        boton.onclick=function(){
-
-
-
-            // iniciar cronómetro al primer toque
-
-            if(!iniciado){
-
-
-                iniciado=true;
-
-
-                intervalo=setInterval(()=>{
-
-
-                    tiempo+=0.1;
-
-
-                    document.getElementById("timer").innerHTML=
-                    "Tiempo: "+
-                    tiempo.toFixed(1);
-
-
-
-                },100);
-
-
-            }
-
-
-
-
-            // número correcto
-
-            if(numero===siguiente){
-
-
-
-                boton.style.visibility="hidden";
-
-
-                siguiente++;
-
-
-
-                // terminó
-
-                if(siguiente===17){
-
-
-
-                    clearInterval(intervalo);
-
-
-
-                    setTimeout(()=>{
-
-
-                        alert(
-                        "🎉 Terminaste en "+
-                        tiempo.toFixed(1)+
-                        " segundos"
-                        );
-
-
-
-                    },200);
-
-
-
-                }
-
-
-
-            }else{
-
-
-                alert(
-                "❌ Error. Toca el número "+
-                siguiente
-                );
-
-
-            }
-
-
-
-        };
-
-
-
-        game.appendChild(boton);
-
-
-
-    });
-
-
-
+let siguiente = 1;
+let startTime = null;
+let timerInterval = null;
+
+function startTimer(){
+    startTime = Date.now();
+
+    timerInterval = setInterval(()=>{
+        let t = (Date.now() - startTime) / 1000;
+        document.getElementById("timer").innerText = t.toFixed(2) + "s";
+    }, 50);
 }
 
+function stopTimer(){
+    clearInterval(timerInterval);
+}
 
+function buildGame(){
 
+    const game = document.getElementById("game");
+    game.innerHTML = "";
 
-document
-.getElementById("reset")
-.onclick=iniciarJuego;
+    siguiente = 1;
+    startTime = null;
+    stopTimer();
+    document.getElementById("timer").innerText = "0.00s";
 
+    numeros.forEach(n => {
 
+        const b = document.createElement("button");
+        b.className = "btn";
+        b.innerText = n;
+        b.style.background = colores[n];
 
-// iniciar al abrir
+        const press = () => {
 
-iniciarJuego();
+            if(!startTime){
+                startTimer();
+            }
 
+            if(n === siguiente){
 
+                b.style.visibility = "hidden";
+                siguiente++;
+
+                if(siguiente === 17){
+                    stopTimer();
+                    document.getElementById("title").innerText =
+                        "🔥 Terminaste en " +
+                        document.getElementById("timer").innerText;
+                }
+
+            } else {
+
+                // feedback rápido sin alert
+                b.classList.add("wrong");
+                setTimeout(()=>b.classList.remove("wrong"), 120);
+            }
+        };
+
+        // ultra responsive en iPhone
+        b.addEventListener("pointerdown", press);
+
+        game.appendChild(b);
+    });
+}
+
+document.getElementById("reset").onclick = () => {
+    document.getElementById("title").innerText = "Tap 1 → 16";
+    buildGame();
+};
+
+buildGame();
 
 </script>
 
-
 </body>
-
 </html>
